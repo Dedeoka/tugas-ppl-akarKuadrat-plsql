@@ -30,10 +30,53 @@
         <div id="waktu-eksekusi">
             <!-- Waktu eksekusi akan ditampilkan di sini -->
         </div>
+        <h1 class="mt-5">Data Bilangan</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Bilangan</th>
+                    <th>Akar Kuadrat</th>
+                    <th>Waktu Eksekusi (milidetik)</th>
+                </tr>
+            </thead>
+            <tbody id="data-table">
+                <!-- Data akan ditampilkan di sini -->
+            </tbody>
+        </table>
+
     </div>
 
     <!-- Menggunakan Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Fungsi untuk mengambil dan menampilkan data dari server
+        async function fetchData() {
+            try {
+                const response = await axios.get('/test'); // Ganti URL sesuai dengan endpoint Anda
+                const data = response.data;
+
+                const dataTable = document.getElementById('data-table');
+                dataTable.innerHTML = '';
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${item.bilangan}</td>
+                        <td>${item.akar_kuadrat}</td>
+                        <td>${item.waktu} ms</td>
+                    `;
+                    dataTable.appendChild(row);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Panggil fungsi fetchData saat halaman dimuat
+        fetchData();
+    </script>
 
     <script>
         // Temukan elemen formulir dan hasil
@@ -51,8 +94,6 @@
             const bilangan = bilanganInput.value;
 
             // Catat waktu awal eksekusi
-            const waktuAwal = new Date().getTime();
-
             // Kirim permintaan POST ke server dengan menggunakan token CSRF menggunakan Axios
             try {
                 const response = await axios.post('/test', {
@@ -60,34 +101,32 @@
                 }, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken, // Menggunakan token CSRF yang telah didefinisikan sebelumnya
+                        'X-CSRF-TOKEN': csrfToken,
                     }
                 });
 
                 const data = response.data;
                 const {
                     bilangan_terakhir,
-                    hasil_kuadrat
+                    hasil_kuadrat,
+                    waktu_eksekusi
                 } = data;
-
-                // Catat waktu akhir eksekusi
-                const waktuAkhir = new Date().getTime();
-
-                // Hitung waktu eksekusi
-                const waktuEksekusi = waktuAkhir - waktuAwal;
 
                 // Tampilkan hasil di dalam div
                 hasilDiv.innerHTML = `
-                <p>Bilangan Terakhir: ${bilangan_terakhir}</p>
-                <p>Hasil Kuadrat: ${hasil_kuadrat}</p>
-            `;
+                    <p>Hasil Kuadrat: ${hasil_kuadrat}</p>
+                `;
 
                 // Tampilkan waktu eksekusi di dalam div waktu-eksekusi
-                waktuEksekusiDiv.innerHTML = `Waktu Eksekusi: ${waktuEksekusi} milidetik`;
+                waktuEksekusiDiv.innerHTML = `Waktu Eksekusi: ${waktu_eksekusi} milidetik`;
+
+                fetchData();
+
             } catch (error) {
                 hasilDiv.innerHTML = 'Terjadi kesalahan. Coba lagi nanti.';
                 console.error(error);
             }
+
         });
     </script>
 </body>

@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('tests', function (Blueprint $table) {
             $table->id();
             $table->string('bilangan');
+            $table->float('akar_kuadrat', 12, 4);
+            $table->float('waktu', 12, 4)->nullable();
             $table->timestamps();
         });
     }

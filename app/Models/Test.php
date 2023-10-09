@@ -10,5 +10,7 @@ class Test extends Model
     use HasFactory;
     protected $fillable = [
         'bilangan',
+        'akar_kuadrat',
+        'waktu',
     ];
 }

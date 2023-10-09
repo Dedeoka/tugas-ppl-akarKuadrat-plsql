@@ -11,7 +11,13 @@ class TestController extends Controller
 {
     public function index()
     {
-        return view('welcome');
+        try {
+            $data = DB::table('tests')->select('id', 'bilangan', 'akar_kuadrat', 'waktu')->get();
+
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat mengambil data.'], 500);
+        }
     }
 
     /**
@@ -28,7 +34,7 @@ class TestController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'bilangan' => 'required|numeric', // Gantilah dengan validasi yang sesuai
+            'bilangan' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -41,20 +47,16 @@ class TestController extends Controller
         // Panggil stored procedure untuk menyimpan data ke dalam tabel
         try {
             $result = DB::select('CALL unit_test(?)', [$bilangan]);
+
+            // Mengirim hasil waktu dan hasil kuadrat sebagai respons JSON
+            return response()->json([
+                'message' => 'Data berhasil disimpan.',
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan saat memanggil stored procedure.'], 500);
         }
-
-        // Hitung akar kuadrat
-        $kuadrat = sqrt($bilangan);
-
-        // Berikan respons sesuai dengan kebutuhan Anda
-        return response()->json([
-            'message' => 'Data berhasil disimpan.',
-            'bilangan_terakhir' => $bilangan,
-            'hasil_kuadrat' => $kuadrat,
-        ], 200);
     }
+
 
     /**
      * Display the specified resource.
